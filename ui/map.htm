@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>EX</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+        function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: new google.maps.LatLng(50.2822168, 28.6252064),
+          zoom: 18
+        });
+        var infoWindow = new google.maps.InfoWindow;
+
+          // Change this depending on the name of your PHP or XML file
+          downloadUrl('http://ex.polovnikov.com/get', function(data) {
+            var xml = data.responseXML;
+            var markers = xml.documentElement.getElementsByTagName('marker');
+            
+			Array.prototype.forEach.call(markers, function(markerElem) {
+              var imei = markerElem.getAttribute('imei'); 			// imei
+              var phone = markerElem.getAttribute('phone');			// phone
+              var datetime = markerElem.getAttribute('datetime');	// datetime
+			  
+			  // location
+              var point = new google.maps.LatLng(
+                  parseFloat(markerElem.getAttribute('lat')),
+                  parseFloat(markerElem.getAttribute('lng')));
+
+              var infowincontent = document.createElement('div');
+			  
+              var label_imei = document.createElement('strong');
+              label_imei.textContent = "IMEI: " + imei
+              infowincontent.appendChild(label_imei);
+			  
+              infowincontent.appendChild(document.createElement('br'));
+
+              var label_phone = document.createElement('text');
+              label_phone.textContent = "Phone: " + phone
+              infowincontent.appendChild(label_phone);
+			  
+			  infowincontent.appendChild(document.createElement('br'));
+			  
+			  var label_phone = document.createElement('text');
+              label_phone.textContent = "Datetime: " + datetime
+              infowincontent.appendChild(label_phone);
+			  
+			  infowincontent.appendChild(document.createElement('br'));
+			  
+			  var label_lng = document.createElement('text');
+              label_lng.textContent = "Longitude: " + markerElem.getAttribute('lng')
+              infowincontent.appendChild(label_lng);
+			  
+			  infowincontent.appendChild(document.createElement('br'));
+			  
+			  var label_lat = document.createElement('text');
+              label_lat.textContent = "Latitude: " + markerElem.getAttribute('lat')
+              infowincontent.appendChild(label_lat);
+			  
+              var marker = new google.maps.Marker({
+                map: map,
+                position: point,
+				icon: "http://ex.polovnikov.com/ui/marker.png"
+              });
+              marker.addListener('click', function() {
+                infoWindow.setContent(infowincontent);
+                infoWindow.open(map, marker);
+              });
+            });			
+          });
+        }
+
+
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+      function doNothing() {}
+    </script>
+
+    <script async defer
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAh4NPtVxIYda4Pq_Yb25OZZeYO3bvLwnA&callback=initMap">
+		</script>
+  </body>
+</html>
